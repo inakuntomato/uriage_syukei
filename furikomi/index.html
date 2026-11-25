@@ -156,6 +156,9 @@
     transform:translateY(-70%) rotate(45deg); pointer-events:none;
   }
   .select-wrap select{padding-right:34px; text-align:center; font-weight:900; font-size:18px}
+  .type-seg{display:flex; gap:6px}
+  .seg-btn{flex:1; padding:10px 0; font-size:17px; font-weight:700; border-radius:10px; border:1.5px solid var(--line-strong); background:var(--surface); color:var(--ink-2); cursor:pointer; font-variant-numeric:tabular-nums}
+  .seg-btn.active{background:var(--focus); border-color:var(--focus); color:#fff}
   .date-selects{display:flex; align-items:center; gap:6px}
   .date-selects .select-wrap{flex:1; min-width:0}
   .date-selects select{font-size:17px; font-weight:700; padding-left:8px; padding-right:28px}
@@ -351,12 +354,11 @@
           '<span class="date-slash">/</span>' +
           '<div class="select-wrap"><select class="f-day" aria-label="日">' + dayOptions(md.day) + '</select></div>' +
         '</div></div>' +
-        '<div class="field"><label>区分（C / B / N）</label><div class="select-wrap"><select class="f-type" aria-label="区分">' +
-          '<option value=""' + (data.type===''||data.type==null?' selected':'') + '></option>' +
-          '<option value="C"' + (data.type==='C'?' selected':'') + '>C</option>' +
-          '<option value="B"' + (data.type==='B'?' selected':'') + '>B</option>' +
-          '<option value="N"' + (data.type==='N'?' selected':'') + '>N</option>' +
-        '</select></div></div>' +
+        '<div class="field"><label>区分（C / B / N）</label><div class="type-seg" role="group" aria-label="区分">' +
+          '<button type="button" class="seg-btn' + (data.type==='C'?' active':'') + '" data-type="C">C</button>' +
+          '<button type="button" class="seg-btn' + (data.type==='B'?' active':'') + '" data-type="B">B</button>' +
+          '<button type="button" class="seg-btn' + (data.type==='N'?' active':'') + '" data-type="N">N</button>' +
+        '</div></div>' +
       '</div>' +
       '<div class="grid-3">' +
         '<div class="field"><label>時給</label><div class="unit"><input class="f-wage" type="number" inputmode="numeric" min="0" step="1" value="' + escapeAttr(data.wage) + '"><span>円</span></div></div>' +
@@ -376,6 +378,15 @@
         update();
       }
     });
+    var segBtns = card.querySelectorAll('.seg-btn');
+    for (var j = 0; j < segBtns.length; j++) {
+      segBtns[j].addEventListener('click', function(){
+        var btns = card.querySelectorAll('.seg-btn');
+        for (var k = 0; k < btns.length; k++) btns[k].classList.remove('active');
+        this.classList.add('active');
+        update();
+      });
+    }
     var inputs = card.querySelectorAll('input, select');
     for (var i = 0; i < inputs.length; i++) {
       inputs[i].addEventListener('input', update);
@@ -421,7 +432,8 @@
       var monthEl = c.querySelector('.f-month');
       var dayEl = c.querySelector('.f-day');
       var date = (monthEl && dayEl) ? (monthEl.value + '/' + dayEl.value) : '';
-      var type = c.querySelector('.f-type').value;
+      var typeBtn = c.querySelector('.seg-btn.active');
+      var type = typeBtn ? typeBtn.getAttribute('data-type') : '';
       var wageRaw = c.querySelector('.f-wage').value;
       var hoursRaw = c.querySelector('.f-hours').value;
       var backRaw = c.querySelector('.f-back').value;
