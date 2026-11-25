@@ -164,6 +164,12 @@
   .date-selects select{font-size:17px; font-weight:700; padding-left:8px; padding-right:28px}
   .date-selects .select-wrap::after{right:10px}
   .date-slash{font-weight:900; color:var(--ink-2); font-size:17px; flex:none}
+  .date-btn{flex:1; min-width:0; position:relative; border:1.5px solid var(--line-strong); background:var(--surface); border-radius:10px; padding:10px 26px 10px 8px; font-size:17px; font-weight:700; color:var(--ink); text-align:center; cursor:pointer}
+  .date-btn::after{content:""; position:absolute; right:10px; top:50%; width:8px; height:8px; border-right:2px solid var(--ink-2); border-bottom:2px solid var(--ink-2); transform:translateY(-70%) rotate(45deg); pointer-events:none}
+  .date-panel{display:grid; grid-template-columns:repeat(6,1fr); gap:6px; margin-top:10px}
+  .date-panel[hidden]{display:none}
+  .num-btn{padding:9px 0; font-size:16px; font-weight:600; border-radius:8px; border:1.5px solid var(--line-strong); background:var(--surface); color:var(--ink); cursor:pointer}
+  .num-btn.active{background:var(--focus); border-color:var(--focus); color:#fff}
 
   .calc-line{
     margin-top:12px; padding-top:10px; border-top:1px dashed var(--line);
@@ -350,9 +356,9 @@
       '</div>' +
       '<div class="grid">' +
         '<div class="field"><label>日付</label><div class="date-selects">' +
-          '<div class="select-wrap"><select class="f-month" aria-label="月">' + monthOptions(md.month) + '</select></div>' +
+          '<button type="button" class="date-btn f-month-btn" data-value="' + md.month + '" aria-label="月">' + md.month + '月</button>' +
           '<span class="date-slash">/</span>' +
-          '<div class="select-wrap"><select class="f-day" aria-label="日">' + dayOptions(md.day) + '</select></div>' +
+          '<button type="button" class="date-btn f-day-btn" data-value="' + md.day + '" aria-label="日">' + md.day + '日</button>' +
         '</div></div>' +
         '<div class="field"><label>区分</label><div class="type-seg" role="group" aria-label="区分">' +
           '<button type="button" class="seg-btn' + (data.type==='C'?' active':'') + '" data-type="C">C</button>' +
@@ -360,6 +366,7 @@
           '<button type="button" class="seg-btn' + (data.type==='N'?' active':'') + '" data-type="N">N</button>' +
         '</div></div>' +
       '</div>' +
+      '<div class="date-panel" hidden></div>' +
       '<div class="grid-3">' +
         '<div class="field"><label>時給</label><div class="unit"><input class="f-wage" type="number" inputmode="numeric" min="0" step="1" value="' + escapeAttr(data.wage) + '"><span>円</span></div></div>' +
         '<div class="field"><label>時間</label><div class="unit"><input class="f-hours" type="number" inputmode="decimal" min="0" step="0.5" value="' + escapeAttr(data.hours) + '"><span>h</span></div></div>' +
@@ -378,6 +385,33 @@
         update();
       }
     });
+    var panel = card.querySelector('.date-panel');
+    function openPanel(kind){
+      if (!panel.hidden && panel.dataset.kind === kind) { panel.hidden = true; return; }
+      var btn = card.querySelector(kind === 'month' ? '.f-month-btn' : '.f-day-btn');
+      var cur = parseInt(btn.getAttribute('data-value'), 10);
+      var max = kind === 'month' ? 12 : 31;
+      panel.innerHTML = '';
+      for (var n = 1; n <= max; n++) {
+        (function(num){
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'num-btn' + (num === cur ? ' active' : '');
+          b.textContent = num;
+          b.addEventListener('click', function(){
+            btn.setAttribute('data-value', num);
+            btn.textContent = num + (kind === 'month' ? '月' : '日');
+            panel.hidden = true;
+            update();
+          });
+          panel.appendChild(b);
+        })(n);
+      }
+      panel.dataset.kind = kind;
+      panel.hidden = false;
+    }
+    card.querySelector('.f-month-btn').addEventListener('click', function(){ openPanel('month'); });
+    card.querySelector('.f-day-btn').addEventListener('click', function(){ openPanel('day'); });
     var segBtns = card.querySelectorAll('.seg-btn');
     for (var j = 0; j < segBtns.length; j++) {
       segBtns[j].addEventListener('click', function(){
@@ -429,9 +463,9 @@
     var rows = [];
     for (var i = 0; i < cards.length; i++) {
       var c = cards[i];
-      var monthEl = c.querySelector('.f-month');
-      var dayEl = c.querySelector('.f-day');
-      var date = (monthEl && dayEl) ? (monthEl.value + '/' + dayEl.value) : '';
+      var monthEl = c.querySelector('.f-month-btn');
+      var dayEl = c.querySelector('.f-day-btn');
+      var date = (monthEl && dayEl) ? (monthEl.getAttribute('data-value') + '/' + dayEl.getAttribute('data-value')) : '';
       var typeBtn = c.querySelector('.seg-btn.active');
       var type = typeBtn ? typeBtn.getAttribute('data-type') : '';
       var wageRaw = c.querySelector('.f-wage').value;
