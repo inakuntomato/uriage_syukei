@@ -292,7 +292,7 @@
   function nextId(){ idSeq++; return 'row-' + idSeq + '-' + Date.now(); }
 
   var initial = [
-    { type:'', wage:'0', hours:'0', back:'', transport:'' }
+    { type:'', wage:'', hours:'', back:'', transport:'' }
   ];
 
   function todayMonthDay(){
@@ -332,7 +332,7 @@
 
   function createCard(data){
     var md = resolveMonthDay(data);
-    data = data || { type:'', wage:'0', hours:'0', back:'', transport:'' };
+    data = data || { type:'', wage:'', hours:'', back:'', transport:'' };
     var card = document.createElement('div');
     card.className = 'card';
     card.dataset.id = nextId();
@@ -358,8 +358,8 @@
         '</select></div></div>' +
       '</div>' +
       '<div class="grid-3">' +
-        '<div class="field"><label>時給</label><div class="unit"><input class="f-wage" type="number" inputmode="numeric" min="0" step="1" placeholder="1300" value="' + escapeAttr(data.wage) + '"><span>円</span></div></div>' +
-        '<div class="field"><label>時間</label><div class="unit"><input class="f-hours" type="number" inputmode="decimal" min="0" step="0.5" placeholder="6.0" value="' + escapeAttr(data.hours) + '"><span>h</span></div></div>' +
+        '<div class="field"><label>時給</label><div class="unit"><input class="f-wage" type="number" inputmode="numeric" min="0" step="1" value="' + escapeAttr(data.wage) + '"><span>円</span></div></div>' +
+        '<div class="field"><label>時間</label><div class="unit"><input class="f-hours" type="number" inputmode="decimal" min="0" step="0.5" value="' + escapeAttr(data.hours) + '"><span>h</span></div></div>' +
         '<div class="field"><label>バ</label><div class="unit"><input class="f-back" type="number" inputmode="numeric" min="0" step="1" placeholder="0" value="' + escapeAttr(data.back) + '"><span>円</span></div></div>' +
         '<div class="field"><label>交</label><div class="unit"><input class="f-transport" type="number" inputmode="numeric" min="0" step="1" placeholder="0" value="' + escapeAttr(data.transport) + '"><span>円</span></div></div>' +
       '</div>' +
@@ -507,9 +507,6 @@
     cardsEl.appendChild(card);
     renumber();
     update();
-    var dateInput = card.querySelector('.f-month');
-    if (dateInput) dateInput.focus();
-    card.scrollIntoView({ behavior:'smooth', block:'center' });
   });
 
   resetBtn.addEventListener('click', function(){
