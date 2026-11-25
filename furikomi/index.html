@@ -124,7 +124,7 @@
   .del-btn:active{background:var(--danger-bg); color:var(--danger); border-color:var(--danger)}
 
   .grid{
-    display:grid; grid-template-columns:1.55fr .65fr; gap:10px;
+    display:grid; grid-template-columns:1.55fr .65fr; gap:10px; align-items:end;
   }
   .grid-3{
     display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;
@@ -133,7 +133,7 @@
     .grid-3{grid-template-columns:1fr 1fr 1fr 1fr}
   }
   .field label{
-    display:block; font-size:12px; font-weight:700; color:var(--ink-2); margin:0 0 5px 2px; letter-spacing:.02em;
+    display:block; font-size:12px; font-weight:700; color:var(--ink-2); margin:0 0 5px 2px; letter-spacing:.02em; white-space:nowrap;
   }
   .field input, .field select{
     width:100%; border:1.5px solid var(--line-strong); background:var(--surface);
@@ -354,7 +354,7 @@
           '<span class="date-slash">/</span>' +
           '<div class="select-wrap"><select class="f-day" aria-label="日">' + dayOptions(md.day) + '</select></div>' +
         '</div></div>' +
-        '<div class="field"><label>区分（C / B / N）</label><div class="type-seg" role="group" aria-label="区分">' +
+        '<div class="field"><label>区分</label><div class="type-seg" role="group" aria-label="区分">' +
           '<button type="button" class="seg-btn' + (data.type==='C'?' active':'') + '" data-type="C">C</button>' +
           '<button type="button" class="seg-btn' + (data.type==='B'?' active':'') + '" data-type="B">B</button>' +
           '<button type="button" class="seg-btn' + (data.type==='N'?' active':'') + '" data-type="N">N</button>' +
