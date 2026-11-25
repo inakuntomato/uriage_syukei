@@ -1,0 +1,15 @@
+{
+  "name": "振込申請文ジェネレーター",
+  "short_name": "振込申請",
+  "display": "standalone",
+  "background_color": "#FFF0E4",
+  "theme_color": "#FFF0E4",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#FFF0E4"/>
+  <!-- sparkles -->
+  <path d="M92 62 L100 88 L126 96 L100 104 L92 130 L84 104 L58 96 L84 88 Z" fill="#FFC2D4"/>
+  <path d="M420 78 L426 98 L446 104 L426 110 L420 130 L414 110 L394 104 L414 98 Z" fill="#FFD873"/>
+  <path d="M66 386 L72 404 L90 410 L72 416 L66 434 L60 416 L42 410 L60 404 Z" fill="#FFD873"/>
+  <path d="M438 372 L445 395 L468 402 L445 409 L438 432 L431 409 L408 402 L431 395 Z" fill="#FFC2D4"/>
+  <!-- coin -->
+  <circle cx="256" cy="262" r="152" fill="#FFC94D"/>
+  <circle cx="256" cy="262" r="126" fill="#FFDC8A"/>
+  <!-- yen -->
+  <text x="256" y="268" text-anchor="middle" font-family="'Hiragino Maru Gothic ProN','Hiragino Sans','Noto Sans JP',sans-serif" font-size="178" font-weight="700" fill="#D9822B">¥</text>
+  <!-- face -->
+  <circle cx="202" cy="316" r="11" fill="#8A5A2B"/>
+  <circle cx="310" cy="316" r="11" fill="#8A5A2B"/>
+  <path d="M236 330 Q256 348 276 330" stroke="#8A5A2B" stroke-width="9" stroke-linecap="round" fill="none"/>
+  <ellipse cx="168" cy="334" rx="20" ry="12" fill="#FFB3C1"/>
+  <ellipse cx="344" cy="334" rx="20" ry="12" fill="#FFB3C1"/>
+</svg>
