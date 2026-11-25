@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="light dark" />
+<link rel="icon" href="data:," />
+<title>振込申請文ジェネレーター</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Sans+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f3f4f1;
+    --surface:#ffffff;
+    --surface-2:#eef0ec;
+    --ink:#1c2220;
+    --ink-2:#5a6660;
+    --ink-3:#8a958f;
+    --line:#dde1dc;
+    --line-strong:#c9cfc9;
+    --accent:#14532d;
+    --accent-ink:#ffffff;
+    --accent-soft:#e6f0e8;
+    --total-bg:#1c2220;
+    --total-ink:#ffffff;
+    --total-sub:#b9c4bc;
+    --danger:#b42318;
+    --danger-bg:#fef3f2;
+    --focus:#2f7d4f;
+    --shadow:0 1px 2px rgba(20,30,25,.06), 0 8px 24px rgba(20,30,25,.06);
+    --radius:14px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#101312;
+      --surface:#1a1e1c;
+      --surface-2:#222725;
+      --ink:#eef1ee;
+      --ink-2:#a7b3ab;
+      --ink-3:#7d8a81;
+      --line:#2c332f;
+      --line-strong:#3a423d;
+      --accent:#7fd6a4;
+      --accent-ink:#0e1a12;
+      --accent-soft:#1e2f24;
+      --total-bg:#e8efe9;
+      --total-ink:#131714;
+      --total-sub:#4b5a4f;
+      --danger:#ff9a8f;
+      --danger-bg:#2e1a18;
+      --focus:#7fd6a4;
+      --shadow:0 1px 2px rgba(0,0,0,.35), 0 8px 24px rgba(0,0,0,.25);
+    }
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Noto Sans JP", "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+    line-height:1.6;
+    padding-bottom:32px;
+  }
+  button, input, select{font:inherit; color:inherit}
+  button, select, input{min-height:48px}
+  button{cursor:pointer}
+
+  .wrap{max-width:720px; margin:0 auto; padding:20px 16px 8px}
+
+  .lead{margin:2px 0 18px}
+  .lead h1{font-size:22px; line-height:1.35; font-weight:900; letter-spacing:.01em; margin:0}
+
+  /* total bar */
+  .total-bar{
+    background:var(--total-bg); color:var(--total-ink);
+    border-radius:16px; padding:16px 18px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px;
+    box-shadow:var(--shadow);
+    position:sticky; top:10px; z-index:5;
+  }
+  .total-bar .label{font-size:13px; font-weight:700; letter-spacing:.04em; color:var(--total-sub); line-height:1.3}
+  .total-bar .label span{display:block; font-size:11px; font-weight:500; margin-top:2px}
+  .total-bar .amount{font-size:30px; font-weight:900; line-height:1; white-space:nowrap; font-variant-numeric:tabular-nums}
+  .total-bar .amount small{font-size:16px; font-weight:700; margin-left:2px}
+
+  .section-head{
+    display:flex; align-items:baseline; justify-content:space-between; gap:12px;
+    margin:26px 2px 10px;
+  }
+  .section-head h2{font-size:15px; font-weight:900; margin:0; letter-spacing:.02em}
+  .section-head p{margin:0; font-size:12px; color:var(--ink-3)}
+
+  /* shift cards */
+  .cards{display:flex; flex-direction:column; gap:12px}
+  .card{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:var(--shadow); padding:14px 14px 12px;
+  }
+  .card-top{
+    display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px;
+  }
+  .card-no{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:13px; font-weight:900;
+  }
+  .card-no .dot{
+    width:26px; height:26px; border-radius:999px; background:var(--accent-soft); color:var(--accent);
+    display:inline-flex; align-items:center; justify-content:center; font-size:13px; font-weight:900;
+  }
+  @media (prefers-color-scheme: dark){ .card-no .dot{color:var(--accent)} }
+  .card-day-total{font-size:13px; color:var(--ink-2); font-variant-numeric:tabular-nums}
+  .card-day-total strong{color:var(--ink); font-size:15px; font-weight:900}
+  .del-btn{
+    min-height:40px; min-width:40px; padding:6px 10px;
+    border:1px solid var(--line); background:transparent; border-radius:10px;
+    color:var(--ink-2); font-size:13px; font-weight:700;
+    display:inline-flex; align-items:center; gap:4px;
+  }
+  .del-btn:active{background:var(--danger-bg); color:var(--danger); border-color:var(--danger)}
+
+  .grid{
+    display:grid; grid-template-columns:1.55fr .65fr; gap:10px;
+  }
+  .grid-3{
+    display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:10px;
+  }
+  @media (min-width:560px){
+    .grid-3{grid-template-columns:1fr 1fr 1fr 1fr}
+  }
+  .field label{
+    display:block; font-size:12px; font-weight:700; color:var(--ink-2); margin:0 0 5px 2px; letter-spacing:.02em;
+  }
+  .field input, .field select{
+    width:100%; border:1.5px solid var(--line-strong); background:var(--surface);
+    border-radius:10px; padding:10px 12px; font-size:17px; font-weight:600;
+    font-variant-numeric:tabular-nums; outline:none; appearance:none; -webkit-appearance:none;
+  }
+  .field input:focus, .field select:focus{border-color:var(--focus); box-shadow:0 0 0 3px color-mix(in srgb, var(--focus) 22%, transparent)}
+  .field input::placeholder{color:var(--ink-3); font-weight:400}
+  .field .unit{position:relative}
+  .field .unit input{padding-right:34px}
+  .field .unit span{
+    position:absolute; right:12px; top:50%; transform:translateY(-50%);
+    font-size:13px; color:var(--ink-3); font-weight:700; pointer-events:none;
+  }
+  .select-wrap{position:relative}
+  .select-wrap::after{
+    content:""; position:absolute; right:14px; top:50%; width:8px; height:8px;
+    border-right:2px solid var(--ink-2); border-bottom:2px solid var(--ink-2);
+    transform:translateY(-70%) rotate(45deg); pointer-events:none;
+  }
+  .select-wrap select{padding-right:34px; text-align:center; font-weight:900; font-size:18px}
+  .date-selects{display:flex; align-items:center; gap:6px}
+  .date-selects .select-wrap{flex:1; min-width:0}
+  .date-selects select{font-size:17px; font-weight:700; padding-left:8px; padding-right:28px}
+  .date-selects .select-wrap::after{right:10px}
+  .date-slash{font-weight:900; color:var(--ink-2); font-size:17px; flex:none}
+
+  .calc-line{
+    margin-top:12px; padding-top:10px; border-top:1px dashed var(--line);
+    font-size:13px; color:var(--ink-2); display:flex; flex-wrap:wrap; gap:4px 10px; font-variant-numeric:tabular-nums;
+  }
+  .calc-line b{color:var(--ink); font-weight:700}
+  .calc-line .warn{color:var(--danger); font-weight:700}
+
+  .add-btn{
+    width:100%; margin-top:12px; min-height:52px;
+    border:1.5px dashed var(--line-strong); background:transparent; border-radius:14px;
+    font-size:15px; font-weight:900; color:var(--ink);
+    display:flex; align-items:center; justify-content:center; gap:8px;
+  }
+  .add-btn:active{background:var(--surface-2)}
+  .add-btn .plus{
+    width:24px; height:24px; border-radius:999px; background:var(--ink); color:var(--bg);
+    display:inline-flex; align-items:center; justify-content:center; font-size:16px; line-height:1; font-weight:900;
+  }
+
+  .reset-row{display:flex; justify-content:flex-end; margin-top:10px}
+  .text-btn{
+    min-height:40px; padding:6px 10px; border:none; background:transparent;
+    color:var(--ink-3); font-size:13px; font-weight:700; text-decoration:underline; text-underline-offset:3px;
+  }
+
+  /* preview */
+  .preview-box{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+    box-shadow:var(--shadow); overflow:hidden;
+  }
+  .preview-box pre{
+    margin:0; padding:16px; font-family:"Noto Sans Mono","Hiragino Kaku Gothic ProN",monospace;
+    font-size:14.5px; line-height:1.85; white-space:pre-wrap; word-break:break-all;
+    color:var(--ink); min-height:120px;
+  }
+  .preview-empty{padding:22px 16px; text-align:center; color:var(--ink-3); font-size:14px}
+
+  .note{margin:12px 2px 0; font-size:12.5px; color:var(--ink-3); line-height:1.7}
+
+  /* copy button area (in flow, below preview) */
+  .copy-bar{
+    max-width:720px; margin:18px auto 0; padding:0 16px;
+  }
+  .copy-bar-inner{margin:0 auto}
+  .copy-btn{
+    width:100%; min-height:56px; border:none; border-radius:14px;
+    background:var(--accent); color:var(--accent-ink);
+    font-size:16px; font-weight:900; letter-spacing:.02em;
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    box-shadow:0 6px 18px rgba(0,0,0,.14);
+  }
+  .copy-btn:active{transform:scale(.99)}
+  .copy-btn.done{background:#15803d; color:#fff}
+  @media (prefers-color-scheme: dark){ .copy-btn.done{background:#2f9e5f; color:#08130c} }
+  .copy-btn svg{flex:none}
+
+  .toast{
+    position:fixed; left:50%; bottom:28px; transform:translateX(-50%) translateY(12px);
+    background:var(--ink); color:var(--bg); font-size:14px; font-weight:700;
+    padding:11px 18px; border-radius:999px; opacity:0; pointer-events:none;
+    transition:opacity .22s, transform .22s; z-index:30; white-space:nowrap;
+    box-shadow:0 8px 24px rgba(0,0,0,.25);
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+
+  @media (min-width:640px){
+    .wrap{padding-top:28px}
+    .lead h1{font-size:26px}
+    .total-bar .amount{font-size:36px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="lead">
+    <h1>振込申請文ジェネレーター</h1>
+  </div>
+
+  <div class="total-bar" aria-live="polite">
+    <div class="label">振込金額（合計）<span id="totalCount">シフト未入力</span></div>
+    <div class="amount"><span id="totalAmount">0</span><small>円</small></div>
+  </div>
+
+  <div class="section-head">
+    <h2>シフト入力</h2>
+    <p>1件ずつ追加できます</p>
+  </div>
+
+  <div class="cards" id="cards"></div>
+
+  <button class="add-btn" id="addBtn" type="button"><span class="plus">+</span> シフトを追加</button>
+  <div class="reset-row">
+    <button class="text-btn" id="resetBtn" type="button">入力をすべて消す</button>
+  </div>
+
+  <div class="section-head">
+    <h2>生成結果（プレビュー）</h2>
+    <p>この内容がコピーされます</p>
+  </div>
+  <div class="preview-box">
+    <pre id="preview"></pre>
+  </div>
+  <p class="note">店名・名前・口座情報はここには入れません。送信先に合わせて、必要な情報は送る直前に自分で足してください。このページは入力を保存しません。</p>
+</div>
+
+<div class="copy-bar">
+  <div class="copy-bar-inner">
+    <button class="copy-btn" id="copyBtn" type="button">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      <span id="copyBtnText">入力内容をコピー</span>
+    </button>
+  </div>
+</div>
+<div class="toast" id="toast" role="status">コピーしました ✓ そのまま貼れます</div>
+
+<script>
+(function(){
+  var cardsEl = document.getElementById('cards');
+  var previewEl = document.getElementById('preview');
+  var totalAmountEl = document.getElementById('totalAmount');
+  var totalCountEl = document.getElementById('totalCount');
+  var addBtn = document.getElementById('addBtn');
+  var resetBtn = document.getElementById('resetBtn');
+  var copyBtn = document.getElementById('copyBtn');
+  var copyBtnText = document.getElementById('copyBtnText');
+  var toast = document.getElementById('toast');
+
+  var idSeq = 0;
+  function nextId(){ idSeq++; return 'row-' + idSeq + '-' + Date.now(); }
+
+  var initial = [
+    { type:'', wage:'0', hours:'0', back:'', transport:'' }
+  ];
+
+  function todayMonthDay(){
+    var now = new Date();
+    return { month: now.getMonth() + 1, day: now.getDate() };
+  }
+  function monthOptions(selected){
+    var html = '';
+    for (var m = 1; m <= 12; m++) {
+      html += '<option value="' + m + '"' + (m === selected ? ' selected' : '') + '>' + m + '月</option>';
+    }
+    return html;
+  }
+  function dayOptions(selected){
+    var html = '';
+    for (var d = 1; d <= 31; d++) {
+      html += '<option value="' + d + '"' + (d === selected ? ' selected' : '') + '>' + d + '日</option>';
+    }
+    return html;
+  }
+  function resolveMonthDay(data){
+    if (data && data.date) {
+      var parts = String(data.date).split('/');
+      var pm = parseInt(parts[0], 10);
+      var pd = parseInt(parts[1], 10);
+      if (!isNaN(pm) && !isNaN(pd)) return { month: pm, day: pd };
+    }
+    if (data && (data.month != null || data.day != null)) {
+      var t = todayMonthDay();
+      return {
+        month: data.month != null ? parseInt(data.month, 10) : t.month,
+        day: data.day != null ? parseInt(data.day, 10) : t.day
+      };
+    }
+    return todayMonthDay();
+  }
+
+  function createCard(data){
+    var md = resolveMonthDay(data);
+    data = data || { type:'', wage:'0', hours:'0', back:'', transport:'' };
+    var card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.id = nextId();
+    card.innerHTML =
+      '<div class="card-top">' +
+        '<div class="card-no"><span class="dot"></span><span class="card-title">シフト</span></div>' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<div class="card-day-total">合計 <strong class="day-total">0円</strong></div>' +
+          '<button type="button" class="del-btn" aria-label="このシフトを削除">削除</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="grid">' +
+        '<div class="field"><label>日付</label><div class="date-selects">' +
+          '<div class="select-wrap"><select class="f-month" aria-label="月">' + monthOptions(md.month) + '</select></div>' +
+          '<span class="date-slash">/</span>' +
+          '<div class="select-wrap"><select class="f-day" aria-label="日">' + dayOptions(md.day) + '</select></div>' +
+        '</div></div>' +
+        '<div class="field"><label>区分（C / B / N）</label><div class="select-wrap"><select class="f-type" aria-label="区分">' +
+          '<option value=""' + (data.type===''||data.type==null?' selected':'') + '></option>' +
+          '<option value="C"' + (data.type==='C'?' selected':'') + '>C</option>' +
+          '<option value="B"' + (data.type==='B'?' selected':'') + '>B</option>' +
+          '<option value="N"' + (data.type==='N'?' selected':'') + '>N</option>' +
+        '</select></div></div>' +
+      '</div>' +
+      '<div class="grid-3">' +
+        '<div class="field"><label>時給</label><div class="unit"><input class="f-wage" type="number" inputmode="numeric" min="0" step="1" placeholder="1300" value="' + escapeAttr(data.wage) + '"><span>円</span></div></div>' +
+        '<div class="field"><label>時間</label><div class="unit"><input class="f-hours" type="number" inputmode="decimal" min="0" step="0.5" placeholder="6.0" value="' + escapeAttr(data.hours) + '"><span>h</span></div></div>' +
+        '<div class="field"><label>バ</label><div class="unit"><input class="f-back" type="number" inputmode="numeric" min="0" step="1" placeholder="0" value="' + escapeAttr(data.back) + '"><span>円</span></div></div>' +
+        '<div class="field"><label>交</label><div class="unit"><input class="f-transport" type="number" inputmode="numeric" min="0" step="1" placeholder="0" value="' + escapeAttr(data.transport) + '"><span>円</span></div></div>' +
+      '</div>' +
+      '<div class="calc-line"></div>';
+
+    card.querySelector('.del-btn').addEventListener('click', function(){
+      card.remove();
+      renumber();
+      update();
+      if (cardsEl.children.length === 0) {
+        cardsEl.appendChild(createCard());
+        renumber();
+        update();
+      }
+    });
+    var inputs = card.querySelectorAll('input, select');
+    for (var i = 0; i < inputs.length; i++) {
+      inputs[i].addEventListener('input', update);
+      inputs[i].addEventListener('change', update);
+    }
+    return card;
+  }
+
+  function escapeAttr(s){
+    return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+  }
+
+  function renumber(){
+    var cards = cardsEl.querySelectorAll('.card');
+    for (var i = 0; i < cards.length; i++) {
+      var dot = cards[i].querySelector('.dot');
+      if (dot) dot.textContent = String(i + 1);
+    }
+    // hide delete when only 1? keep visible but it recreates empty row
+  }
+
+  function parseNum(v){
+    if (v === '' || v == null) return 0;
+    var n = parseFloat(String(v).replace(/,/g,''));
+    return isNaN(n) ? 0 : n;
+  }
+  function parseIntNum(v){
+    if (v === '' || v == null) return 0;
+    var n = parseInt(String(v).replace(/,/g,''), 10);
+    return isNaN(n) ? 0 : n;
+  }
+
+  function fmtHours(h){
+    // 小数1桁
+    return (Math.round(h * 10) / 10).toFixed(1);
+  }
+
+  function readRows(){
+    var cards = cardsEl.querySelectorAll('.card');
+    var rows = [];
+    for (var i = 0; i < cards.length; i++) {
+      var c = cards[i];
+      var monthEl = c.querySelector('.f-month');
+      var dayEl = c.querySelector('.f-day');
+      var date = (monthEl && dayEl) ? (monthEl.value + '/' + dayEl.value) : '';
+      var type = c.querySelector('.f-type').value;
+      var wageRaw = c.querySelector('.f-wage').value;
+      var hoursRaw = c.querySelector('.f-hours').value;
+      var backRaw = c.querySelector('.f-back').value;
+      var transportRaw = c.querySelector('.f-transport').value;
+      var wage = parseIntNum(wageRaw);
+      var hours = parseNum(hoursRaw);
+      var back = parseIntNum(backRaw);
+      var transport = parseIntNum(transportRaw);
+      var salary = Math.round(wage * hours);
+      var total = salary + back + transport;
+      rows.push({
+        el: c, date: date, type: type,
+        wage: wage, hours: hours, back: back, transport: transport,
+        wageRaw: wageRaw, hoursRaw: hoursRaw, backRaw: backRaw, transportRaw: transportRaw,
+        salary: salary, total: total,
+        hasAny: !!(date || wageRaw !== '' || hoursRaw !== '' || backRaw !== '' || transportRaw !== '')
+      });
+      // per-card display
+      var dayTotalEl = c.querySelector('.day-total');
+      if (dayTotalEl) dayTotalEl.textContent = total + '円';
+      var calcEl = c.querySelector('.calc-line');
+      if (calcEl) {
+        if (wageRaw === '' && hoursRaw === '' && backRaw === '' && transportRaw === '') {
+          calcEl.innerHTML = '<span>時給・時間・バ・交を入れると自動で計算します</span>';
+        } else {
+          var warn = '';
+          if (date === '') warn = '<span class="warn">日付を入れてください</span>';
+          var transportPart = transport > 0 ? '<span>＋ 交 <b>' + transport + '円</b></span>' : '';
+          calcEl.innerHTML =
+            '<span>給 <b>' + wage + '円 × ' + fmtHours(hours) + 'h = ' + salary + '円</b></span>' +
+            '<span>＋ バ <b>' + back + '円</b></span>' +
+            transportPart +
+            '<span>＝ <b>' + total + '円</b></span>' + warn;
+        }
+      }
+    }
+    return rows;
+  }
+
+  function buildText(rows){
+    var valid = rows.filter(function(r){ return r.date !== ''; });
+    // 振込金額は日付がある行の合計。日付なしで金額だけある行も合計には含める（取りこぼし防止）が、内訳には出さない
+    var grand = 0;
+    rows.forEach(function(r){ grand += r.total; });
+
+    var shiftStr = valid.map(function(r){ return r.date + r.type; }).join('、');
+
+    var lines = [];
+    lines.push('振込金額：' + grand + '円');
+    lines.push('シフト日(C/B/N):' + shiftStr);
+    lines.push('');
+    lines.push('振込金額の内訳(給・バ等）:');
+    lines.push('');
+    valid.forEach(function(r, idx){
+      lines.push(r.date + r.type + ' 合計' + r.total + '円');
+      lines.push('給 ' + r.wage + '円×' + fmtHours(r.hours) + 'h');
+      lines.push('バ ' + r.back + '円');
+      if (r.transport > 0) lines.push('交 ' + r.transport + '円');
+      if (idx !== valid.length - 1) lines.push('');
+    });
+    return { text: lines.join('\n'), grand: grand, count: valid.length };
+  }
+
+  var currentText = '';
+
+  function update(){
+    var rows = readRows();
+    var built = buildText(rows);
+    currentText = built.text;
+    totalAmountEl.textContent = built.grand;
+    totalCountEl.textContent = built.count === 0 ? 'シフト未入力' : built.count + '件のシフト';
+    if (rows.length === 1 && !rows[0].hasAny) {
+      previewEl.textContent = built.text;
+    } else {
+      previewEl.textContent = built.text;
+    }
+    // reset copy button state on edit
+    copyBtn.classList.remove('done');
+    copyBtnText.textContent = '入力内容をコピー';
+  }
+
+  addBtn.addEventListener('click', function(){
+    var card = createCard();
+    cardsEl.appendChild(card);
+    renumber();
+    update();
+    var dateInput = card.querySelector('.f-month');
+    if (dateInput) dateInput.focus();
+    card.scrollIntoView({ behavior:'smooth', block:'center' });
+  });
+
+  resetBtn.addEventListener('click', function(){
+    cardsEl.innerHTML = '';
+    cardsEl.appendChild(createCard());
+    renumber();
+    update();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function(){ toast.classList.remove('show'); }, 2600);
+  }
+
+  function fallbackCopy(text){
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    ta.style.left = '0'; ta.style.top = '0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch(e){ ok = false; }
+    document.body.removeChild(ta);
+    return ok;
+  }
+
+  copyBtn.addEventListener('click', function(){
+    var text = currentText;
+    function done(){
+      copyBtn.classList.add('done');
+      copyBtnText.textContent = 'コピーしました ✓';
+      showToast('コピーしました ✓ そのまま貼れます');
+      setTimeout(function(){
+        copyBtn.classList.remove('done');
+        copyBtnText.textContent = '入力内容をコピー';
+      }, 3000);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function(){
+        if (fallbackCopy(text)) done(); else showToast('コピーできませんでした。プレビューを長押しでコピーしてください');
+      });
+    } else {
+      if (fallbackCopy(text)) done(); else showToast('コピーできませんでした。プレビューを長押しでコピーしてください');
+    }
+  });
+
+  // init
+  initial.forEach(function(d){ cardsEl.appendChild(createCard(d)); });
+  renumber();
+  update();
+})();
+</script>
+</body>
+</html>
