@@ -141,6 +141,7 @@
     font-variant-numeric:tabular-nums; outline:none; appearance:none; -webkit-appearance:none;
   }
   .field input:focus, .field select:focus{border-color:var(--focus); box-shadow:0 0 0 3px color-mix(in srgb, var(--focus) 22%, transparent)}
+  .field input, .field select{scroll-margin-top:110px; scroll-margin-bottom:30px}
   .field input::placeholder{color:var(--ink-3); font-weight:400}
   .field .unit{position:relative}
   .field .unit input{padding-right:34px}
@@ -292,7 +293,7 @@
   function nextId(){ idSeq++; return 'row-' + idSeq + '-' + Date.now(); }
 
   var initial = [
-    { type:'', wage:'', hours:'', back:'', transport:'' }
+    { type:'B', wage:'', hours:'', back:'', transport:'' }
   ];
 
   function todayMonthDay(){
@@ -332,7 +333,7 @@
 
   function createCard(data){
     var md = resolveMonthDay(data);
-    data = data || { type:'', wage:'', hours:'', back:'', transport:'' };
+    data = data || { type:'B', wage:'', hours:'', back:'', transport:'' };
     var card = document.createElement('div');
     card.className = 'card';
     card.dataset.id = nextId();
